@@ -30,14 +30,16 @@ class Aventure
     #[ORM\OneToOne(inversedBy: 'aventureDebutee', cascade: ['persist', 'remove'])]
     private ?Etape $premiereEtape = null;
 
-    #[ORM\ManyToMany(targetEntity: Personnage::class, mappedBy: 'aventures')]
-    private Collection $personnages;
+    #[ORM\OneToMany(mappedBy: 'aventure', targetEntity: Partie::class)]
+    private Collection $parties;
+
+
 
     public function __construct()
     {
         $this->etapes = new ArrayCollection();
         $this->finsPossibles = new ArrayCollection();
-        $this->personnages = new ArrayCollection();
+        $this->parties = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -141,35 +143,39 @@ class Aventure
         return $this;
     }
 
-    /**
-     * @return Collection<int, Personnage>
-     */
-    public function getPersonnages(): Collection
-    {
-        return $this->personnages;
-    }
-
-    public function addPersonnage(Personnage $personnage): self
-    {
-        if (!$this->personnages->contains($personnage)) {
-            $this->personnages->add($personnage);
-            $personnage->addAventure($this);
-        }
-
-        return $this;
-    }
-
-    public function removePersonnage(Personnage $personnage): self
-    {
-        if ($this->personnages->removeElement($personnage)) {
-            $personnage->removeAventure($this);
-        }
-
-        return $this;
-    }
     
     public function __toString()
     {
         return $this->titre;
+    }
+
+    /**
+     * @return Collection<int, Partie>
+     */
+    public function getParties(): Collection
+    {
+        return $this->parties;
+    }
+
+    public function addParty(Partie $party): self
+    {
+        if (!$this->parties->contains($party)) {
+            $this->parties->add($party);
+            $party->setAventure($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParty(Partie $party): self
+    {
+        if ($this->parties->removeElement($party)) {
+            // set the owning side to null (unless already changed)
+            if ($party->getAventure() === $this) {
+                $party->setAventure(null);
+            }
+        }
+
+        return $this;
     }
 }

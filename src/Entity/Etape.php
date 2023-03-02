@@ -33,9 +33,13 @@ class Etape
     #[ORM\OneToOne(mappedBy: 'premiereEtape', cascade: ['persist', 'remove'])]
     private ?Aventure $aventureDebutee = null;
 
+    #[ORM\OneToMany(mappedBy: 'etape', targetEntity: Partie::class)]
+    private Collection $parties;
+
     public function __construct()
     {
         $this->alternatives = new ArrayCollection();
+        $this->parties = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -146,5 +150,35 @@ class Etape
     public function __toString()
     {
         return $this->libelle;
+    }
+
+    /**
+     * @return Collection<int, Partie>
+     */
+    public function getParties(): Collection
+    {
+        return $this->parties;
+    }
+
+    public function addParty(Partie $party): self
+    {
+        if (!$this->parties->contains($party)) {
+            $this->parties->add($party);
+            $party->setEtape($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParty(Partie $party): self
+    {
+        if ($this->parties->removeElement($party)) {
+            // set the owning side to null (unless already changed)
+            if ($party->getEtape() === $this) {
+                $party->setEtape(null);
+            }
+        }
+
+        return $this;
     }
 }

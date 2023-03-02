@@ -15,7 +15,6 @@ class PersonnageType extends AbstractType
             ->add('prenom')
             ->add('nom')
             ->add('avatar')
-            ->add('aventures')
         ;
     }
 

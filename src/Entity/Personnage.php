@@ -21,15 +21,15 @@ class Personnage
     #[ORM\ManyToOne(inversedBy: 'personnages')]
     private ?Avatar $avatar = null;
 
-    #[ORM\ManyToMany(targetEntity: Aventure::class, inversedBy: 'personnages')]
-    private Collection $aventures;
-
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
+    #[ORM\OneToMany(mappedBy: 'aventurier', targetEntity: Partie::class)]
+    private Collection $parties;
+
     public function __construct()
     {
-        $this->aventures = new ArrayCollection();
+        $this->parties = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -60,30 +60,6 @@ class Personnage
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, Aventure>
-     */
-    public function getAventures(): Collection
-    {
-        return $this->aventures;
-    }
-
-    public function addAventure(Aventure $aventure): self
-    {
-        if (!$this->aventures->contains($aventure)) {
-            $this->aventures->add($aventure);
-        }
-
-        return $this;
-    }
-
-    public function removeAventure(Aventure $aventure): self
-    {
-        $this->aventures->removeElement($aventure);
-
-        return $this;
-    }
     
     public function __toString()
     {
@@ -98,6 +74,36 @@ class Personnage
     public function setNom(string $nom): self
     {
         $this->nom = $nom;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Partie>
+     */
+    public function getParties(): Collection
+    {
+        return $this->parties;
+    }
+
+    public function addParty(Partie $party): self
+    {
+        if (!$this->parties->contains($party)) {
+            $this->parties->add($party);
+            $party->setAventurier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParty(Partie $party): self
+    {
+        if ($this->parties->removeElement($party)) {
+            // set the owning side to null (unless already changed)
+            if ($party->getAventurier() === $this) {
+                $party->setAventurier(null);
+            }
+        }
 
         return $this;
     }
